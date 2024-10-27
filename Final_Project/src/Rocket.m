@@ -8,16 +8,17 @@ classdef Rocket
         y = 0;
         vx = 0;
         vy = 0;
-        g = - 5;
-        theta = 0; % 角度制
+        v = 0;
+        g = - 25;
         % 设定反向加速度
-        up = 100;
+        up = 150;
+        para = 5;% 水平加速度
         % 判断左转、右转、加速
         left = false;
         right = false;
         speed = false;
         changeSpeed = false;
-        fuel = 200;
+        fuel = 1000;
     end
 
     methods
@@ -39,25 +40,25 @@ classdef Rocket
         
             % 转向逻辑
             if obj.left
-                if obj.theta>-90
-                    obj.theta = obj.theta - 15;
-                    obj.changeSpeed = true;
-                end
+                obj.para = -40;
+                obj.changeSpeed = true;
                 obj.left = false;
             elseif obj.right
-                if obj.theta <= 90
-                    obj.theta = obj.theta + 15;
-                    obj.changeSpeed = true;
-                end
+                obj.para = 40;
+                obj.changeSpeed = true;
                 obj.right = false;
             end
 
-            % 转向后速度更新一次就够了，不然有bug
+            % 水平方向更新速度
             if obj.changeSpeed 
-                v = sqrt(obj.vx^2+obj.vy^2);
-                obj.vx = v* sind(obj.theta);
-                obj.vy = - v* cosd(obj.theta);
+                obj.vx = obj.vx + obj.para*t;
                 obj.changeSpeed = false;
+                obj.para = 1;
+            elseif obj.vx > 0 %设定一个水平速度衰减
+                obj.vx = obj.vx - obj.para*t;
+
+            elseif obj.vx < 0
+                obj.vx = obj.vx + obj.para*t;
             end
             
             % 更新速度
@@ -66,6 +67,10 @@ classdef Rocket
                 obj.vy = obj.vy + obj.up * t; % 减少vy以模拟向上推力的效果
                 obj.speed = false; % 重置加速标志
             end
+
+            obj.v = sqrt(obj.vx^2+obj.vy^2);% 设置总速度
+
+
         end
         %%
         % 取得火箭位置
